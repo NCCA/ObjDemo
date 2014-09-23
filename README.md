@@ -1,3 +1,5 @@
-#SimpleNGL
-This is the most basic version of an NGL demo, it creates a simple window in Qt and allows
-the manipulaiton of the teapot using the mouse.
+#ObjDemo
+
+Loads a mesh from an obj file using ngl::Obj and displays it.
+
+(Interactive WebGL demo)[http://nccastaff.bournemouth.ac.uk/jmacey/WebGL/ObjDemo/] 
