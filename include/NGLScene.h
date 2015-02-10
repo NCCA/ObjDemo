@@ -5,6 +5,7 @@
 #include <ngl/Colour.h>
 #include <ngl/Light.h>
 #include <ngl/Obj.h>
+#include <ngl/NCCABinMesh.h>
 #include <ngl/Text.h>
 #include <ngl/Transformation.h>
 //----------------------------------------------------------------------------------------------------------------------

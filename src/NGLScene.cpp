@@ -31,9 +31,6 @@ NGLScene::NGLScene(QWindow *_parent) : OpenGLWindow(_parent)
   setTitle("Obj Demo");
   m_showBBox=true;
   m_showBSphere=true;
-//  m_text=new ngl::Text(QFont("Arial",16));
-//  m_text->setScreenSize(width(),height());
-//  m_text->setColour(1,1,1);
 
 
 }
@@ -114,7 +111,6 @@ void NGLScene::initialize()
 
   // first we create a mesh from an obj passing in the obj file and texture
   m_mesh = new ngl::Obj("models/Helix.obj","textures/helix_base.tif");
-
   // now we need to create this as a VAO so we can draw it
   m_mesh->createVAO();
   m_mesh->calcBoundingSphere();
@@ -122,6 +118,9 @@ void NGLScene::initialize()
   prim->createSphere("sphere",1.0,20);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
+  m_text=new ngl::Text(QFont("Arial",16));
+  m_text->setScreenSize(width(),height());
+  m_text->setColour(1,1,1);
 
 }
 
@@ -157,6 +156,7 @@ void NGLScene::render()
 	loadMatricesToShader();
 	// draw the mesh
 	m_mesh->draw();
+	//m_bin->draw();
 	// draw the mesh bounding box
 	(*shader)["nglColourShader"]->use();
 
@@ -179,7 +179,7 @@ void NGLScene::render()
       glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
   }
 
-  //m_text->renderText(10,18,"P toggle bounding Sphere B Toggle Bounding Box");
+  m_text->renderText(10,18,"P toggle bounding Sphere B Toggle Bounding Box");
 
 }
 
