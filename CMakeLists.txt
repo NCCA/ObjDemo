@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.11)
 set(PROJECT_NAME ObjDemo)
 project(${PROJECT_NAME})
 #Bring the headers into the project (local ones)
-include_directories(include $ENV{HOME}/NGL/include)
+include_directories(include $ENV{HOME}/NGL/include /usr/local/include)
 
 #the file(GLOB...) allows for wildcard additions of our src dir
 set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp  
@@ -17,10 +17,15 @@ set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp
 # see what platform we are on and set platform defines
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	add_definitions(-DDARWIN)
+	find_library(MACGL OpenGL)
+	set ( PROJECT_LINK_LIBS -lNGL ${MACGL})
 
-elif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	add_definitions(-DLINUX)
+	set ( PROJECT_LINK_LIBS -lNGL -lGL)
+
 endif()
+
 
 
 #As were using Qt we need to run moc
@@ -40,7 +45,6 @@ add_definitions(-O2 -D_FILE_OFFSET_BITS=64 -fPIC)
 
 
 # now add NGL specific values
-set ( PROJECT_LINK_LIBS -lNGL -lGL)
 link_directories( $ENV{HOME}/NGL/lib )
 # as NGL uses Qt we need to define this flag
 add_definitions(-DQT5BUILD)

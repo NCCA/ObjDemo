@@ -11,6 +11,8 @@ isEqual(QT_MAJOR_VERSION, 5) {
 	cache()
 	DEFINES +=QT5BUILD
 }
+macx:QMAKE_MAC_SDK = macosx10.11
+
 # where to put moc auto generated files
 MOC_DIR=moc
 # on a mac we don't create a .app bundle file ( for ease of multiplatform use)
