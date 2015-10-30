@@ -42,12 +42,12 @@ NGLScene::~NGLScene()
 
 }
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
-  glViewport(0,0,_w,_h);
+  m_width=_event->size().width()*devicePixelRatio();
+  m_height=_event->size().height()*devicePixelRatio();
   // now set the camera size values as the screen size has changed
-  m_cam->setShape(45,(float)_w/_h,0.05,350);
-  update();
+  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
 }
 
 
@@ -69,10 +69,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,4,8);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam= new ngl::Camera(from,to,up);
+  m_cam.set(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam->setShape(45,(float)720.0/576.0,0.05,350);
+  m_cam.setShape(45,(float)720.0/576.0,0.05,350);
   // now to load the shader and set the values
   // grab an instance of shader manager
   // grab an instance of shader manager
@@ -102,7 +102,7 @@ void NGLScene::initializeGL()
   shader->setShaderParam4f("Colour",1.0,1.0,1.0,1.0);
 
   // first we create a mesh from an obj passing in the obj file and texture
-  m_mesh = new ngl::Obj("models/Helix.obj","textures/helix_base.tif");
+  m_mesh.reset(  new ngl::Obj("models/Helix.obj","textures/helix_base.tif"));
   // now we need to create this as a VAO so we can draw it
   m_mesh->createVAO();
   m_mesh->calcBoundingSphere();
@@ -110,7 +110,7 @@ void NGLScene::initializeGL()
   prim->createSphere("sphere",1.0,20);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
-  m_text=new ngl::Text(QFont("Arial",16));
+  m_text.reset(new ngl::Text(QFont("Arial",16)));
   m_text->setScreenSize(width(),height());
   m_text->setColour(1,1,1);
 
@@ -121,7 +121,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-  ngl::Mat4 MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam->getVPMatrix();
+  ngl::Mat4 MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam.getVPMatrix();
 
   shader->setShaderParamFromMat4("MVP",MVP);
 }
@@ -130,6 +130,7 @@ void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glViewport(0,0,m_width,m_height);
    ngl::Mat4 rotX;
    ngl::Mat4 rotY;
    // create the rotation matrices
@@ -283,6 +284,5 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   default : break;
   }
   // finally update the GLWindow and re-draw
-  //if (isExposed())
-    update();
+  update();
 }
