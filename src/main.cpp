@@ -30,7 +30,19 @@ int main(int argc, char **argv)
   // now set the depth buffer to 24 bits
   format.setDepthBufferSize(24);
   // now we are going to create our scene window
-  NGLScene window;
+  std::string oname("models/Helix.obj");
+  std::string tname("textures/helix_base.tif");
+  if(argc ==2)
+  {
+    oname=argv[1];
+    tname="textures/ratGrid.png";
+  }
+  else if(argc == 3)
+  {
+    oname=argv[1];
+    tname=argv[2];
+  }
+  NGLScene window(oname,tname);
   // and set the OpenGL format
   window.setFormat(format);
   // we can now query the version to see if it worked

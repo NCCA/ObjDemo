@@ -15,13 +15,13 @@
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for x/y translation with mouse movement
 //----------------------------------------------------------------------------------------------------------------------
-const static float INCREMENT=0.01;
+constexpr float INCREMENT=0.01f;
 //----------------------------------------------------------------------------------------------------------------------
 /// @brief the increment for the wheel zoom
 //----------------------------------------------------------------------------------------------------------------------
-const static float ZOOM=0.1;
+constexpr float ZOOM=0.1f;
 
-NGLScene::NGLScene()
+NGLScene::NGLScene(const std::string &_oname, const std::string &_tname)
 {
   // re-size the widget to that of the parent (in this case the GLFrame passed in on construction)
   m_rotate=false;
@@ -31,7 +31,8 @@ NGLScene::NGLScene()
   setTitle("Obj Demo");
   m_showBBox=true;
   m_showBSphere=true;
-
+  m_oname=_oname;
+  m_tname=_tname;
 
 }
 
@@ -44,17 +45,18 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL(QResizeEvent *_event)
 {
-  m_width=_event->size().width()*devicePixelRatio();
-  m_height=_event->size().height()*devicePixelRatio();
+  m_width=static_cast<unsigned int>(_event->size().width()*devicePixelRatio());
+  m_height=static_cast<unsigned int>(_event->size().height()*devicePixelRatio());
   // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
+  m_cam.setShape(45.0f,static_cast<float>(width())/height(),0.05f,350.0f);
 }
 
 void NGLScene::resizeGL(int _w , int _h)
 {
-  m_cam.setShape(45.0f,(float)_w/_h,0.05f,350.0f);
-  m_width=_w*devicePixelRatio();
-  m_height=_h*devicePixelRatio();
+  m_cam.setShape(45.0f,static_cast<float>(_w)/_h,0.05f,350.0f);
+  m_width=static_cast<unsigned int>(_w*devicePixelRatio());
+  m_height=static_cast<unsigned int>(_h*devicePixelRatio());
+
 }
 
 void NGLScene::initializeGL()
@@ -78,7 +80,7 @@ void NGLScene::initializeGL()
   m_cam.set(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam.setShape(45,(float)720.0/576.0,0.05,350);
+  m_cam.setShape(45.0f,720.0f/576.0f,0.05f,350.0f);
   // now to load the shader and set the values
   // grab an instance of shader manager
   // grab an instance of shader manager
@@ -108,7 +110,7 @@ void NGLScene::initializeGL()
   shader->setShaderParam4f("Colour",1.0,1.0,1.0,1.0);
 
   // first we create a mesh from an obj passing in the obj file and texture
-  m_mesh.reset(  new ngl::Obj("models/Helix.obj","textures/helix_base.tif"));
+  m_mesh.reset(  new ngl::Obj(m_oname,m_tname));
   // now we need to create this as a VAO so we can draw it
   m_mesh->createVAO();
   m_mesh->calcBoundingSphere();
