@@ -1,12 +1,10 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
 #include <QFont>
+#include <QFileDialog>
 
 #include "NGLScene.h"
-#include <ngl/Camera.h>
-#include <ngl/Light.h>
 #include <ngl/Transformation.h>
-#include <ngl/Material.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
@@ -32,7 +30,7 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL( int _w, int _h )
 {
-  m_cam.setShape( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
+  m_project=ngl::perspective( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
 }
@@ -55,10 +53,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,4,8);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam.set(from,to,up);
+  m_view=ngl::lookAt(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam.setShape(45.0f,720.0f/576.0f,0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,720.0f/576.0f,0.05f,350.0f);
   // now to load the shader and set the values
   // grab an instance of shader manager
   // grab an instance of shader manager
@@ -107,7 +105,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-  ngl::Mat4 MVP=m_cam.getVPMatrix() *
+  ngl::Mat4 MVP=m_project * m_view *
                 m_mouseGlobalTX*
                 m_transform.getMatrix();
 
@@ -189,6 +187,41 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
         m_win.spinYFace=0;
         m_modelPos.set(ngl::Vec3::zero());
   break;
+
+  case Qt::Key_O :
+  {
+    QString filename = QFileDialog::getOpenFileName(
+              nullptr,
+              tr("load Obj"),
+              QDir::currentPath(),
+              tr("*.obj") );
+
+    if (!filename.isNull())
+    {
+      m_mesh.reset(  new ngl::Obj(filename.toStdString()));
+      // now we need to create this as a VAO so we can draw it
+      m_mesh->createVAO();
+      m_mesh->calcBoundingSphere();
+
+    }
+  }
+  break;
+
+  case Qt::Key_T :
+  {
+    QString filename = QFileDialog::getOpenFileName(
+              nullptr,
+              tr("load texture"),
+              QDir::currentPath(),
+              tr("Image Files (*.png *.jpg *.bmp *.tif)"));
+
+    if (!filename.isNull())
+    {
+      m_mesh->setTexture(filename.toStdString());
+    }
+  }
+  break;
+
   default : break;
   }
   // finally update the GLWindow and re-draw
