@@ -142,7 +142,7 @@ void NGLScene::paintGL()
   if(m_showBBox==true)
   {
     loadMatricesToShader();
-    shader->setUniform("Colour",0.0f,0.0f,1.0f,1.0f);
+    shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
     m_mesh->drawBBox();
   }
   if(m_showBSphere==true)
