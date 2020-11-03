@@ -39,7 +39,7 @@ void NGLScene::initializeGL()
 {
   // we must call this first before any other GL commands to load and link the
   // gl commands from the lib, if this is not done program will crash
-  ngl::NGLInit::instance();
+  ngl::NGLInit::initialize();
 
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
@@ -57,44 +57,38 @@ void NGLScene::initializeGL()
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
   m_project=ngl::perspective(45.0f,720.0f/576.0f,0.05f,350.0f);
-  // now to load the shader and set the values
-  // grab an instance of shader manager
-  // grab an instance of shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  // load a frag and vert shaders
 
-  shader->createShaderProgram("TextureShader");
+  ngl::ShaderLib::createShaderProgram("TextureShader");
 
-  shader->attachShader("TextureVertex",ngl::ShaderType::VERTEX);
-  shader->attachShader("TextureFragment",ngl::ShaderType::FRAGMENT);
-  shader->loadShaderSource("TextureVertex","shaders/TextureVertex.glsl");
-  shader->loadShaderSource("TextureFragment","shaders/TextureFragment.glsl");
+  ngl::ShaderLib::attachShader("TextureVertex",ngl::ShaderType::VERTEX);
+  ngl::ShaderLib::attachShader("TextureFragment",ngl::ShaderType::FRAGMENT);
+  ngl::ShaderLib::loadShaderSource("TextureVertex","shaders/TextureVertex.glsl");
+  ngl::ShaderLib::loadShaderSource("TextureFragment","shaders/TextureFragment.glsl");
 
-  shader->compileShader("TextureVertex");
-  shader->compileShader("TextureFragment");
-  shader->attachShaderToProgram("TextureShader","TextureVertex");
-  shader->attachShaderToProgram("TextureShader","TextureFragment");
+  ngl::ShaderLib::compileShader("TextureVertex");
+  ngl::ShaderLib::compileShader("TextureFragment");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","TextureVertex");
+  ngl::ShaderLib::attachShaderToProgram("TextureShader","TextureFragment");
 
   // link the shader no attributes are bound
-  shader->linkProgramObject("TextureShader");
-  (*shader)["TextureShader"]->use();
+  ngl::ShaderLib::linkProgramObject("TextureShader");
+  ngl::ShaderLib::use("TextureShader");
 
 
 
-  (*shader)[ngl::nglColourShader]->use();
+  ngl::ShaderLib::use(ngl::nglColourShader);
 
-  shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
 
   // first we create a mesh from an obj passing in the obj file and texture
   m_mesh.reset(  new ngl::Obj(m_objFileName,m_textureFileName));
   // now we need to create this as a VAO so we can draw it
   m_mesh->createVAO();
   m_mesh->calcBoundingSphere();
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-  prim->createSphere("sphere",1.0,20);
+  ngl::VAOPrimitives::createSphere("sphere",1.0,20);
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
-  m_text.reset(new ngl::Text(QFont("Arial",16)));
+  m_text.reset(new ngl::Text("fonts/Arial.ttf",16));
   m_text->setScreenSize(width(),height());
   m_text->setColour(1,1,1);
 
@@ -103,13 +97,12 @@ void NGLScene::initializeGL()
 
 void NGLScene::loadMatricesToShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
   ngl::Mat4 MVP=m_project * m_view *
                 m_mouseGlobalTX*
                 m_transform.getMatrix();
 
-  shader->setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("MVP",MVP);
 }
 
 void NGLScene::paintGL()
@@ -129,32 +122,30 @@ void NGLScene::paintGL()
    m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
    m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
 
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["TextureShader"]->use();
+  ngl::ShaderLib::use("TextureShader");
   m_transform.reset();
   loadMatricesToShader();
   // draw the mesh
   m_mesh->draw();
   //m_bin->draw();
   // draw the mesh bounding box
-  (*shader)["nglColourShader"]->use();
+  ngl::ShaderLib::use("nglColourShader");
 
   if(m_showBBox==true)
   {
     loadMatricesToShader();
-    shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+    ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
     m_mesh->drawBBox();
   }
   if(m_showBSphere==true)
   {
-    ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-    shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+    ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
     m_transform.reset();
       glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
         m_transform.setPosition(m_mesh->getSphereCenter());
         m_transform.setScale(m_mesh->getSphereRadius(),m_mesh->getSphereRadius(),m_mesh->getSphereRadius());
         loadMatricesToShader();
-        prim->draw("sphere");
+        ngl::VAOPrimitives::draw("sphere");
       glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
   }
 
