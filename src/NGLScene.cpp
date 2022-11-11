@@ -8,6 +8,7 @@
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
+#include <iostream>
 
 NGLScene::NGLScene(const std::string &_oname, const std::string &_tname)
 {
